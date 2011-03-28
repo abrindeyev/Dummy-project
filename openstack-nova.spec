@@ -1,18 +1,18 @@
-%global with_doc 0
+%global with_doc 1
 
 %if ! (0%{?fedora} > 12 || 0%{?rhel} > 5)
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 %endif
 
 Name:             openstack-nova
-Version:          2011.2
-Release:          0.21.bzr891
+Version:          2011.1.1
+Release:          5
 Summary:          OpenStack Compute (nova)
 
 Group:            Development/Languages
 License:          ASL 2.0
 URL:              http://openstack.org/projects/compute/
-Source0:          http://nova.openstack.org/tarballs/nova-%{version}~bzr891.tar.gz
+Source0:          http://nova.openstack.org/tarballs/nova-%{version}.tar.gz
 Source1:          %{name}-README.rhel6
 Source6:          %{name}.logrotate
 
@@ -84,14 +84,12 @@ Requires:         python-mox >= 0.5.0
 Requires:         python-redis
 Requires:         python-routes
 Requires:         python-sqlalchemy >= 0.6
-Requires:         python-suds >= 0.4.0
 Requires:         python-tornado
 Requires:         python-twisted-core >= 10.1.0
 Requires:         python-twisted-web >= 10.1.0
 Requires:         python-webob = 0.9.8
 Requires:         python-netaddr
 Requires:         python-glance
-Requires:         python-novaclient
 Requires:         python-sqlalchemy-migrate
 Requires:         radvd
 Requires:         iptables iptables-ipv6
@@ -323,9 +321,9 @@ find %{buildroot}%{_sharedstatedir}/nova/CA -name .placeholder -delete
 install -d -m 755 %{buildroot}%{_sysconfdir}/polkit-1/localauthority/50-local.d
 install -p -D -m 644 %{SOURCE21} %{buildroot}%{_sysconfdir}/polkit-1/localauthority/50-local.d/50-%{name}.pkla
 
-# Fix for api-paste.ini misplacement
+# Fix for nova-api.conf misplacement
 install -d -m 750 %{buildroot}%{_sysconfdir}/nova
-mv %{buildroot}%{_sysconfdir}/api-paste.ini %{buildroot}%{_sysconfdir}/nova/api-paste.ini
+mv %{buildroot}%{_sysconfdir}/nova-api.conf %{buildroot}%{_sysconfdir}/nova/nova-api.conf
 
 # Install ajaxterm
 gzip --best -c tools/ajaxterm/ajaxterm.1 > tools/ajaxterm/ajaxterm.1.gz
@@ -355,23 +353,6 @@ if ! fgrep '#includedir /etc/sudoers.d' /etc/sudoers 2>&1 >/dev/null; then
         echo '#includedir /etc/sudoers.d' >> /etc/sudoers
 fi
 
-if rpmquery openstack-nova-cc-config 1>&2 >/dev/null; then
-	# Cloud controller node detected, assuming that is contains database
-	
-	# Database init/migration
-	if [ $1 -gt 1 ]; then
-		current_version=$(nova-manage db version 2>/dev/null)
-		updated_version=$(cd %{python_sitelib}/nova/db/sqlalchemy/migrate_repo; %{__python} manage.py version)
-		if [ "$current_version" -ne "$updated_version" ]; then
-			echo "Performing Nova database upgrade"
-			/usr/bin/nova-manage db sync
-		fi
-	else
-		echo "DB init code, new installation"
-		#/usr/bin/nova-manage db sync
-	fi
-fi
-
 # api
 
 %post api
@@ -379,7 +360,7 @@ fi
 /sbin/chkconfig --add %{name}-direct-api
 
 %preun api
-if [ $1 -eq 0 ] ; then
+if [ $1 = 0 ] ; then
     /sbin/service %{name}-api stop >/dev/null 2>&1
     /sbin/service %{name}-direct-api stop >/dev/null 2>&1
     /sbin/chkconfig --del %{name}-api
@@ -387,7 +368,7 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %postun api
-if [ $1 -eq 1 ] ; then
+if [ $1 = 1 ] ; then
     /sbin/service %{name}-api condrestart
     /sbin/service %{name}-direct-api condrestart
 fi
@@ -399,7 +380,7 @@ fi
 /sbin/chkconfig --add %{name}-compute
 
 %preun compute
-if [ $1 -eq 0 ] ; then
+if [ $1 = 0 ] ; then
     /sbin/service %{name}-ajax-console-proxy stop >/dev/null 2>&1
     /sbin/service %{name}-compute stop >/dev/null 2>&1
     /sbin/chkconfig --del %{name}-ajax-console-proxy
@@ -407,7 +388,7 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %postun compute
-if [ $1 -eq 1 ] ; then
+if [ $1 = 1 ] ; then
     /sbin/service %{name}-ajax-console-proxy condrestart
     /sbin/service %{name}-compute condrestart
 fi
@@ -418,13 +399,13 @@ fi
 /sbin/chkconfig --add %{name}-network
 
 %preun network
-if [ $1 -eq 0 ] ; then
+if [ $1 = 0 ] ; then
     /sbin/service %{name}-network stop >/dev/null 2>&1
     /sbin/chkconfig --del %{name}-network
 fi
 
 %postun network
-if [ $1 -eq 1 ] ; then
+if [ $1 = 1 ] ; then
     /sbin/service %{name}-network condrestart
 fi
 
@@ -434,13 +415,13 @@ fi
 /sbin/chkconfig --add %{name}-objectstore
 
 %preun objectstore
-if [ $1 -eq 0 ] ; then
+if [ $1 = 0 ] ; then
     /sbin/service %{name}-objectstore stop >/dev/null 2>&1
     /sbin/chkconfig --del %{name}-objectstore
 fi
 
 %postun objectstore
-if [ $1 -eq 1 ] ; then
+if [ $1 = 1 ] ; then
     /sbin/service %{name}-objectstore condrestart
 fi
 
@@ -450,13 +431,13 @@ fi
 /sbin/chkconfig --add %{name}-scheduler
 
 %preun scheduler
-if [ $1 -eq 0 ] ; then
+if [ $1 = 0 ] ; then
     /sbin/service %{name}-scheduler stop >/dev/null 2>&1
     /sbin/chkconfig --del %{name}-scheduler
 fi
 
 %postun scheduler
-if [ $1 -eq 1 ] ; then
+if [ $1 = 1 ] ; then
     /sbin/service %{name}-scheduler condrestart
 fi
 
@@ -466,13 +447,13 @@ fi
 /sbin/chkconfig --add %{name}-volume
 
 %preun volume
-if [ $1 -eq 0 ] ; then
+if [ $1 = 0 ] ; then
     /sbin/service %{name}-volume stop >/dev/null 2>&1
     /sbin/chkconfig --del %{name}-volume
 fi
 
 %postun volume
-if [ $1 -eq 1 ] ; then
+if [ $1 = 1 ] ; then
     /sbin/service %{name}-volume condrestart
 fi
 
@@ -506,7 +487,7 @@ fi
 %{_bindir}/nova-api
 %{_bindir}/nova-direct-api
 %defattr(-,nova,nobody,-)
-%config(noreplace) %{_sysconfdir}/nova/api-paste.ini
+%config(noreplace) %{_sysconfdir}/nova/nova-api.conf
 
 %files compute
 %defattr(-,root,root,-)
@@ -553,76 +534,6 @@ fi
 %endif
 
 %changelog
-* Fri Mar 25 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.21.bzr891
-- Update to bzr891
-
-* Fri Mar 25 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.20.bzr890
-- Migrated guestfs patch
-
-* Fri Mar 25 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.19.bzr890
-- Update to bzr890
-
-* Fri Mar 25 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.18.bzr887
-- Update to bzr887
-
-* Fri Mar 25 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.17.bzr886
-- Added dependency on python-suds
-
-* Fri Mar 25 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.16.bzr886
-- Update to bzr886
-
-* Fri Mar 25 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.15.bzr885
-- Added dependency on python-novaclient
-
-* Fri Mar 25 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.14.bzr885
-- Update to bzr885
-
-* Thu Mar 24 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.13.bzr864
-- Update to bzr864
-
-* Tue Mar 22 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.12.bzr843
-- Update to bzr843
-
-* Mon Mar 21 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.11.bzr837
-- Update to bzr837
-
-* Fri Mar 18 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.10.bzr828
-- Update to bzr828
-
-* Thu Mar 17 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.9.bzr815
-- Update to bzr815
-- Removed libvirt-xml-cpus.patch
-
-* Tue Mar 15 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.8.bzr807
-- Update to bzr807
-
-* Tue Mar 15 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.7.bzr806
-- Update to bzr806
-
-* Tue Mar 15 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.6.bzr805
-- Added database migration
-- Temporary disabled documentation build until release
-
-* Tue Mar 15 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.5.bzr805
-- Update to bzr805
-
-* Tue Mar 15 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.4.bzr802
-- Added openstack-nova-libvirt-xml-cpus.patch to prevent error with nova-compute startup
-
-* Tue Mar 15 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.3.bzr802
-- sudo configuration updated
-
-* Tue Mar 15 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.2.bzr802
-- Update to bzr802
-
-* Mon Mar 14 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> 2011.2-0.1.bzr795
-- Cactus pre-release build
-- Changed release to better comply packaging policy
-  https://fedoraproject.org/wiki/Packaging:NamingGuidelines
-- /etc/nova/nova-api.conf -> /etc/nova/api-paste.ini
-- guestfs patch migrated
-- rhel config paths patch - added handling of api-paste.ini
-
 * Wed Mar 02 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> 2011.1.1-5
 - Changed logrotate script - it should not rotate empty logs
 
