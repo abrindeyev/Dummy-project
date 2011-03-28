@@ -2,6 +2,8 @@
 
 # 1st parameter: path to Jenkins job's workspace
 
+cd $1 || exit -1
+
 TARBALLSHOME="http://nova.openstack.org/tarballs"
 SPECORIG="openstack-nova.spec"
 SPECVER=$(grep '^Version:' $SPECORIG | sed 's/^Version:\s\+//')
