@@ -1,4 +1,5 @@
 #!/bin/sh
 
-echo "Done"
-exit 0
+echo "Bumping Release in specfile"
+rpmdev-bumpspec --comment="- rebuilt by Jenkins" openstack-nova.spec
+
