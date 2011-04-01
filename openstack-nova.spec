@@ -6,7 +6,7 @@
 
 Name:             openstack-nova
 Version:          2011.2
-Release:          0.24.bzr891
+Release:          0.25.bzr891
 Summary:          OpenStack Compute (nova)
 
 Group:            Development/Languages
@@ -522,7 +522,7 @@ fi
 %files instancemonitor
 %defattr(-,root,root,-)
 %{_bindir}/nova-instancemonitor
-#{_initrddir}/%{name}-instancemonitor
+%{_initrddir}/%{name}-instancemonitor
 
 %files network
 %defattr(-,root,root,-)
@@ -553,6 +553,9 @@ fi
 %endif
 
 %changelog
+* Fri Apr 01 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.25.bzr891
+- Feature added
+
 * Fri Apr 01 2011 Mr. Jenkins GD <openstack@griddynamics.net> - 2011.2-0.24.bzr891
 - Autobuild
 
