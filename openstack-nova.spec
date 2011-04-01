@@ -6,7 +6,7 @@
 
 Name:             openstack-nova
 Version:          2011.2
-Release:          0.26.bzr905
+Release:          0.26.bzr891
 Summary:          OpenStack Compute (nova)
 
 Group:            Development/Languages
@@ -476,6 +476,11 @@ if [ $1 -eq 1 ] ; then
     /sbin/service %{name}-volume condrestart
 fi
 
+Feature 2 contents:
+slnvlvnwlvnw
+wvkwvnwelvnwelvn
+svkwnvkwnv
+
 %files
 %defattr(-,root,root,-)
 %doc README README.rhel6
@@ -553,8 +558,8 @@ fi
 %endif
 
 %changelog
-* Fri Apr 01 2011 Mr. Jenkins GD <openstack@griddynamics.net> - 2011.2-0.26.bzr905
-- Autorebuild by Jenkins
+* Fri Apr 01 2011 Andrey Brindeyev <abrindeyev@griddynamics.com> - 2011.2-0.26.bzr891
+- Feature2 added
 
 * Fri Apr 01 2011 Mr. Jenkins GD <openstack@griddynamics.net> - 2011.2-0.25.bzr891
 - Autorebuild by Jenkins
