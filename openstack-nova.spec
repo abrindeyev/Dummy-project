@@ -6,7 +6,7 @@
 
 Name:             openstack-nova
 Version:          2011.2
-Release:          0.24.bzr891
+Release:          0.25.bzr891
 Summary:          OpenStack Compute (nova)
 
 Group:            Development/Languages
@@ -553,6 +553,9 @@ fi
 %endif
 
 %changelog
+* Fri Apr 01 2011 Mr. Jenkins GD <openstack@griddynamics.net> - 2011.2-0.25.bzr891
+- Autorebuild by Jenkins
+
 * Fri Apr 01 2011 Mr. Jenkins GD <openstack@griddynamics.net> - 2011.2-0.24.bzr891
 - Autobuild
 
