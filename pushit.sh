@@ -13,3 +13,11 @@ echo -n "git push: "
 git push
 echo $?
 
+echo -n "git pull: "
+git pull -Xtheirs
+echo $?
+
+echo -n "git push: "
+git push
+echo $?
+
