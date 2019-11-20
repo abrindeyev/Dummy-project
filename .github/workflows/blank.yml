@@ -9,11 +9,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Install jq
-      run: sudo apt-get install jq
-    - name: Where's jq?
-      run: which jq
     - name: Display environment
       run: echo $(env | sort)
     - name: Update configs
+      env:
+        UAT_ENV: ${{ secrets.UAT_ENV }}
       run: ./update_config.sh
