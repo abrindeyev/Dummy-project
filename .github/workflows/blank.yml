@@ -15,3 +15,5 @@ jobs:
       run: which jq
     - name: Display environment
       run: echo $(env | sort)
+    - name: Update configs
+      run: ./update_config.sh
