@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 branch="${GITHUB_REF#refs/heads/}"
-prefix="${brach^^}" # uppercase
+prefix="${branch^^}" # uppercase
 
 function kv() {
-  local source="$prefix_ENV"
+  local source="${prefix}_ENV"
   if [[ $source ]]; then
-    echo "${!$source}" | jq -r ".$1"
+    echo "${!source}" | jq -r ".$1"
   else
     exit 1
   fi
 }
 
-jq ".app_id=$(kv appId)" ./config.json
+jq '.app_id="'$(kv appId)'"' ./config.json
